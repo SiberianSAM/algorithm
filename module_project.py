@@ -77,6 +77,7 @@ class Product:
         print(f'Товар с ID {user_input} помещен в корзину')
 
     def del_cart(self):
+        self.show_cart()
         user_input = int(input(f'Введите ID товарова для удаления из корзины: '))
         if user_input in self.cart_storage:
             del self.cart_storage[user_input]
@@ -94,6 +95,86 @@ class Product:
             for prod_cart in self.cart_storage.values():
                 print(f'{prod_cart['id'] : <3} {prod_cart['Название'] : <15} - {prod_cart['Цена'] : <8} - {prod_cart['Вес'] : <6} - {prod_cart['Категория'] : <12} - {prod_cart['Описание'] : <20}')
             print('-' * 100)
+            total_price = 0
+            for product_dict in self.cart_storage.values():
+                price = product_dict.get('Цена')
+                total_price += int(price)
+            print(f'Итоговая цена корзины составляет: {total_price}')
+
+
+    # Методы сортииовки
+    def bubble_sort_cart(self, key='Цена', reverse=False):
+        if not self.cart_storage:
+            print(f'Корзина пуста!')
+            return
+        items = list(self.cart_storage.values())
+        n = len(items)
+        for i in range(n):
+            for j in range(0, n - i - 1):
+                val1 = self._convert_value(items[j].get(key, ''))
+                val2 = self._convert_value(items[j + 1].get(key, ''))
+                if (not reverse and val1 > val2) or (reverse and val1 < val2):
+                    items[j], items[j + 1] = items[j + 1], items[j]
+        self._update_cart_from_sorted_list(items)
+        print(f'Корзина отсортирована методом Bubble Sort по полю: {key}')
+
+    def _convert_value(self, value):
+        if isinstance(value, (int, float)):
+            return value
+        try:
+            return float(value) if '.' in str(value) else int(value)
+        except (ValueError, TypeError):
+            return str(value)
+
+    def _update_cart_from_sorted_list(self, sorted_items):
+        self.cart_storage.clear()
+        for item in sorted_items:
+            self.cart_storage[item['id']] = item
+
+    def sort_cart_menu(self):
+        if not self.cart_storage:
+            print(f'Корзина пуста! Нечего сортировать')
+            return
+
+        print(f'=== МЕНЮ СОРТИРОВКИ КОРЗИНЫ ===')
+        print(f'Выберите поле для сортировки: ')
+        print(f'1. Цена')
+        print(f'2. Вес')
+        print(f'3. Категория')
+        print(f'4. Название')
+
+        field_choice = input('Введите номер поля: ').strip()
+        field_map = {'1': 'Цена', '2': 'Вес', '3': 'Категория', '4': 'Название'}
+        field = field_map.get(field_choice, 'Цена')
+
+        print(f'Выберите порядок сортировки: ')
+        print(f'1. По возрастанию')
+        print(f'2. По убыванию')
+
+        order_choice = input('Введите номер порядка: ').strip()
+        reverse = order_choice == '2'
+
+        print(f'Выберите алгоритм сортировки: ')
+        print(f'1. Bubble Sort (пузырьком)')
+        print(f'2. Insertion Sort (вставками)')
+        print(f'3. Quick Sort (быстрая)')
+        print(f'4. Merge Sort (слиянием)')
+
+        algo_choice = input('Введите номер алгоритма: ').strip()
+
+        if algo_choice == '1':
+            self.bubble_sort_cart(field, reverse)
+        # elif algo_choice == '2':
+        #     self.insertion_sort_cart(field, reverse)
+        # elif algo_choice == '3':
+        #     self.quick_sort_cart(field, reverse)
+        # elif algo_choice == '4':
+        #     self.merge_sort_cart(field, reverse)
+        else:
+            print(f'Неверный выбор алгоритма!')
+
+        self.show_cart()
+
 
     # Для просмотре текущего состояния хранилиша карточек с товаром
     def seeing(self):
@@ -104,16 +185,16 @@ class Product:
 if __name__ == "__main__":
     product = Product()
     while True:
-        print(f'*' * 20)
-        print(f'МАГАЗИН ТОВАРОВ')
-        print(f'*' * 20)
+        print(f'\n=== МАГАЗИН ТОВАРОВ ===')
         print(f'1. Каталог')
         print(f'2. Добавить карточку товара')
         print(f'3. Изменить карточку товара')
         print(f'4. Удалить карточку товара')
-        print(f'5. Добавить товары в корзину / корзина')
+        print(f'5. Добавить товары в корзину')
         print(f'6. Посмотреть корзину')
-        print(f'7. Покинуть магазин товаров')
+        print(f'7. Удалить товары из корзины')
+        print(f'8. Меню сортировки корзины')
+        print(f'9. Покинуть магазин товаров')
         pick = input(f'Ввод: ')
         if pick == '1':
            product.info_storage()
@@ -130,7 +211,9 @@ if __name__ == "__main__":
         elif pick == '7':
             product.del_cart()
         elif pick == '8':
+            product.sort_cart_menu()
+        elif pick == '9':
             print(f'Мы будем скучать без тебя Наш верный покупатель!')
             break
-        elif pick == '9':
+        elif pick == '10':
             product.seeing()
