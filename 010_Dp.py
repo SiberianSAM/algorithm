@@ -73,20 +73,23 @@
 # кратчайших путей между всеми парами вершин в графе,
 # представленного в виде матрицы смежности
 
-def shortest_part(graph, start = 0):
-    n = len((graph))
-    dist = [float('inf')] * n
-    dist[start] = 0
-    visited = [False] * n
-
-    for _ in range(n):
-        u = min((dist[v], v) for v in range(n) if not visited[v])[1]
-        visited[u] = True
-
-        for v in range(n):
-            if graph[u][v] > 0  and not visited[v]:
-                dist[v] = min(dist[v], dist[u] + graph[u][v])
-
+def floyd_warshall(mat):
+    n = len(mat)
+    INF = float('inf')
+    # инициализация
+    dist = [[INF]*n for _ in range(n)]
+    for i in range(n):
+        for j in range(n):
+            if i == j:
+                dist[i][j] = 0
+            elif mat[i][j] != 0: # 0 означает отсутствует ребро
+                dist[i][j] = mat[i][j]
+    # основной тройной цикл
+    for k in range(n):
+        for i in range(n):
+            for j in range(n):
+                if dist[i][k] + dist[k][j] < dist[i][j]:
+                    dist[i][j] = dist[i][k] + dist[k][j]
     return dist
 
 graph = [
@@ -96,4 +99,4 @@ graph = [
     [1, 0, 0, 3]
 ]
 
-print(shortest_part(graph))
+print(floyd_warshall(graph))
