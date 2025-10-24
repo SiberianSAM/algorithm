@@ -118,6 +118,96 @@ class Product:
         self._update_cart_from_sorted_list(items)
         print(f'Корзина отсортирована методом Bubble Sort по полю: {key}')
 
+    def insertion_sort_cart(self, key='Цена', reverse=False):
+        if not self.cart_storage:
+            print(f'Корзина пуста!')
+            return
+
+        items = list(self.cart_storage.values())
+
+        for i in range(1, len(items)):
+            current_item = items[i]
+            current_value = self._convert_value(current_item.get(key, ''))
+            j = i - 1
+
+            while j >= 0 and (
+                    (not reverse and self._convert_value(items[j].get(key, '')) > current_value) or
+                    (reverse and self._convert_value(items[j].get(key, '')) < current_value)
+            ):
+                items[j + 1] = items[j]
+                j -= 1
+            items[j + 1] = current_item
+
+        self._update_cart_from_sorted_list(items)
+        print(f'Корзина отсортирована методом Insertion Sort по полю {key}')
+
+    def quick_sort_cart(self, key='Цена', reverse=False):
+        if not self.cart_storage:
+            print(f'Корзина пуста!')
+            return
+
+        items = list(self.cart_storage.values())
+
+        def quick_sort(arr):
+            if len(arr) <= 1:
+                return arr
+            pivot = arr[len(arr) // 2]
+            pivot_value = self._convert_value(pivot.get(key, ''))
+
+            left = [x for x in arr if (
+                    (not reverse and self._convert_value(x.get(key, '')) < pivot_value) or
+                    (reverse and self._convert_value(x.get(key, '')) > pivot_value)
+            )]
+            middle = [x for x in arr if self._convert_value(x.get(key, '')) == pivot_value]
+            right = [x for x in arr if (
+                    (not reverse and self._convert_value(x.get(key, '')) > pivot_value) or
+                    (reverse and self._convert_value(x.get(key, '')) < pivot_value)
+            )]
+
+            return quick_sort(left) + middle + quick_sort(right)
+
+        sorted_items = quick_sort(items)
+        self._update_cart_from_sorted_list(sorted_items)
+        print(f'Корзина отсортирована методом Quick Sort по полю {key}')
+
+    def merge_sort_cart(self, key='Цена', reverse=False):
+        if not self.cart_storage:
+            print(f'Корзина пуста!')
+            return
+
+        items = list(self.cart_storage.values())
+
+        def merge_sort(arr):
+            if len(arr) <= 1:
+                return arr
+
+            mid = len(arr) // 2
+            left = merge_sort(arr[:mid])
+            right = merge_sort(arr[mid:])
+            return merge(left, right)
+
+        def merge(left, right):
+            result = []
+            i = j = 0
+
+            while i < len(left) and j < len(right):
+                left_val = self._convert_value(left[i].get(key, ''))
+                right_val = self._convert_value(right[j].get(key, ''))
+
+                if (not reverse and left_val <= right_val) or (reverse and left_val >= right_val):
+                    result.append(left[i])
+                    i += 1
+                else:
+                    result.append(right[j])
+                    j += 1
+
+            result.extend(left[i:])
+            result.extend(right[j:])
+            return result
+        sorted_items = merge_sort(items)
+        self._update_cart_from_sorted_list(sorted_items)
+        print(f'Корзина отсортирована методом Merge Sort по полю {key}')
+
     def _convert_value(self, value):
         if isinstance(value, (int, float)):
             return value
@@ -164,12 +254,12 @@ class Product:
 
         if algo_choice == '1':
             self.bubble_sort_cart(field, reverse)
-        # elif algo_choice == '2':
-        #     self.insertion_sort_cart(field, reverse)
-        # elif algo_choice == '3':
-        #     self.quick_sort_cart(field, reverse)
-        # elif algo_choice == '4':
-        #     self.merge_sort_cart(field, reverse)
+        elif algo_choice == '2':
+            self.insertion_sort_cart(field, reverse)
+        elif algo_choice == '3':
+            self.quick_sort_cart(field, reverse)
+        elif algo_choice == '4':
+            self.merge_sort_cart(field, reverse)
         else:
             print(f'Неверный выбор алгоритма!')
 
@@ -185,7 +275,7 @@ class Product:
 if __name__ == "__main__":
     product = Product()
     while True:
-        print(f'\n=== МАГАЗИН ТОВАРОВ ===')
+        print(f'=== МАГАЗИН ТОВАРОВ ===')
         print(f'1. Каталог')
         print(f'2. Добавить карточку товара')
         print(f'3. Изменить карточку товара')
